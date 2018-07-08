@@ -1,0 +1,15 @@
+{
+    "editor.detectIndentation": false,
+    "editor.formatOnPaste": false,
+    "editor.formatOnSave": false,
+    "editor.insertSpaces": true,
+    "editor.rulers": [
+        80
+    ],
+    "editor.tabSize": 4,
+    "phpcs.enable": true,
+    "phpcs.standard": "../../local/codechecker/moodle",
+    "phpfmt.cakephp": false,
+    "phpfmt.psr1": true,
+    "phpfmt.psr2": false
+}
