@@ -17,9 +17,9 @@
 /**
  * Strings for component 'auth_billing', language 'en'.
  *
- * @package auth_billing
- * @copyright 2018 "Valentin Popov" <info@valentineus.link>
- * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package     auth_billing
+ * @copyright   2018 "Valentin Popov" <info@valentineus.link>
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 $string['pluginname'] = 'Authorization from billing';
