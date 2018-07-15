@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Settings of the plugin.
+ * Страница настроек плагина.
  *
  * @package     auth_billing
  * @copyright   2018 "Valentin Popov" <info@valentineus.link>
@@ -25,17 +25,20 @@
 defined('MOODLE_INTERNAL') || die();
 
 if ($ADMIN->fulltree) {
-
+    /* Адрес службы */
     $settings->add(new admin_setting_configtext('auth_billing/host',
         new lang_string('url', 'moodle'), '', null, PARAM_URL));
 
-    $settings->add(new admin_setting_configtext('auth_billing/path',
-        new lang_string('path', 'moodle'), '', '', PARAM_RAW));
+    /* Используемая версия API */
+    $apiversion = array('/v1' => 'v1');
+    $settings->add(new admin_setting_configselect('auth_billing/api',
+        new lang_string('version', 'moodle'), null, '/v1', $apiversion));
 
+    /* Используемый токен */
     $settings->add(new admin_setting_configtext('auth_billing/token',
         new lang_string('password', 'moodle'), '', '', PARAM_RAW));
 
-    /* Display locking / mapping of profile fields. */
+    /* Настройка редактирование полей профиля */
     $authplugin = get_auth_plugin('billing');
     display_auth_lock_options($settings, $authplugin->authtype,
         $authplugin->userfields, get_string('auth_fieldlocks_help', 'auth'), false, false);
