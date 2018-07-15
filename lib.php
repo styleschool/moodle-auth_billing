@@ -25,21 +25,99 @@
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Отправляет данные удалённому серверу.
+ * Класс для работы со внешней системой.
  *
- * @param   moodle_url  $endpoint   Адрес сервера
- * @param   array       $parameters Пакет данных
- * @return  array                   Полученный ответ
+ * @package     auth_billing
+ * @copyright   2018 "Valentin Popov" <info@valentineus.link>
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-function auth_billing_send_package(moodle_url $endpoint, array $parameters) {
-    $curl = new curl();
-    $result = array();
+class auth_billing {
+    /**
+     * Проверяет во внешней системе данные пользователя.
+     *
+     * @param   string  $email      Электронный адрес
+     * @param   string  $password   Пароль пользователя
+     * @return  boolean             Результат синхронизации
+     */
+    public static function check_user(string $email, string $password) {
+        $config = get_config('auth_billing');
+        $url = new moodle_url($config->host . $config->api . '/authorization');
+        $param = array('email' => $email, 'password' => $password, 'token' => $config->token);
 
-    $curl->setHeader(array('Content-Type: application/json'));
-    $contents = $curl->post($endpoint, json_encode($parameters));
-    $response = $curl->getResponse();
+        if (isset(self::send_package($url, $param)[0])) {
+            return self::send_package($url, $param)[0];
+        }
 
-    $result['contents'] = (array) json_decode($contents);
-    $result['response'] = (array) $response;
-    return $result;
+        return false;
+    }
+
+    /**
+     * Создаёт локального пользователя, используя информацию внешней системы.
+     *
+     * @param   string  $email  Электронный адрес
+     * @return  boolean         Результат выполнения
+     */
+    public static function create_user(string $email) {
+        global $CFG;
+
+        /* Не допускаем дублирования пользователя */
+        if (core_user::get_user_by_email($email)) {
+            return false;
+        }
+
+        if ($remoteuser = self::get_remote_user($email)) {
+            /* Создание пользователя */
+            $localuser = new stdClass();
+            $localuser->auth = 'billing';
+            $localuser->email = $email;
+            $localuser->mnethostid = $CFG->mnet_localhost_id;
+            $localuser->secret = random_string(15);
+            $localuser->username = $email;
+
+            /* Поля профиля */
+            $localuser->firstname = isset($remoteuser['profile']->firstname) ? $remoteuser['profile']->firstname : '';
+            $localuser->lastname = isset($remoteuser['profile']->lastname) ? $remoteuser['profile']->lastname : '';
+
+            /* Пароль аккаунта */
+            $localuser->confirmed = 1;
+            $localuser->password = '';
+
+            return (bool) user_create_user($localuser, false, true);
+        }
+
+        return false;
+    }
+
+    /**
+     * Получает данные пользователя из внешней системы.
+     *
+     * @param   string  $email  Электронный адрес
+     * @return  array           Данные пользователя
+     */
+    private static function get_remote_user(string $email) {
+        $config = get_config('auth_billing');
+        $url = new moodle_url($config->host . $config->api . '/get_user');
+        $param = array('email' => $email, 'token' => $config->token);
+        return self::send_package($url, $param);
+    }
+
+    /**
+     * Отправляет данные удалённому серверу.
+     *
+     * @param   moodle_url  $endpoint   Адрес сервера
+     * @param   array       $param      Пакет данных
+     * @return  array                   Полученный ответ
+     */
+    private static function send_package(moodle_url $endpoint, array $param) {
+        $curl = new curl();
+        $curl->setHeader(array('Content-Type: application/json'));
+        $contents = $curl->post($endpoint, json_encode($param));
+        $contents = json_decode($contents);
+
+        if ($contents !== false) {
+            return (array) $contents;
+        }
+
+        return array();
+    }
 }
