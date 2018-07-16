@@ -2,47 +2,47 @@
     // See https://go.microsoft.com/fwlink/?LinkId=733558
     // for the documentation about the tasks.json format
     "version": "2.0.0",
-    "tasks": [
-        {
-            "label": "Testing plugin",
+    "tasks": [{
+            "label": "Moodle: Test plugin",
             "group": "test",
             "type": "shell",
             "command": "vendor/bin/phpunit",
             "args": [
-                "--testsuite=auth_billing_testsuite",
+                "--testdox",
+                "--testsuite=auth_billing_testsuite"
             ],
             "windows": {
-                "command": "vendor\\bin\\phpunit.bat",
+                "command": "vendor\\bin\\phpunit.bat"
             },
             "options": {
-                "cwd": "${workspaceFolder}/../../",
+                "cwd": "${workspaceFolder}/../../"
             },
             "presentation": {
                 "echo": true,
                 "focus": false,
                 "panel": "new",
-                "reveal": "always",
+                "reveal": "always"
             },
-            "problemMatcher": [],
+            "problemMatcher": []
         },
         {
-            "label": "Initial PHPUnit",
+            "label": "Moodle: Init PHPUnit",
             "group": "build",
             "type": "shell",
             "command": "php",
             "args": [
-                "admin/tool/phpunit/cli/init.php",
+                "admin/tool/phpunit/cli/init.php"
             ],
             "options": {
-                "cwd": "${workspaceFolder}/../../",
+                "cwd": "${workspaceFolder}/../../"
             },
             "presentation": {
                 "echo": true,
                 "focus": false,
                 "panel": "new",
-                "reveal": "always",
+                "reveal": "always"
             },
-            "problemMatcher": [],
-        },
+            "problemMatcher": []
+        }
     ]
 }

@@ -24,6 +24,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+require_once($CFG->dirroot . '/user/lib.php');
+
 /**
  * Класс для работы со внешней системой.
  *
@@ -33,26 +35,40 @@ defined('MOODLE_INTERNAL') || die();
  */
 class auth_billing {
     /**
-     * Проверяет во внешней системе данные пользователя.
+     * Проверка работоспособности службы.
      *
-     * @param   string  $email      Электронный адрес
-     * @param   string  $password   Пароль пользователя
-     * @return  boolean             Результат синхронизации
+     * @return  boolean Результат проверки
      */
-    public static function check_user(string $email, string $password) {
-        $config = get_config('auth_billing');
-        $url = new moodle_url($config->host . $config->api . '/authorization');
-        $param = array('email' => $email, 'password' => $password, 'token' => $config->token);
+    public static function check_service() {
+        $result = self::run_method('test', array());
 
-        if (isset(self::send_package($url, $param)[0])) {
-            return self::send_package($url, $param)[0];
+        if (isset($result['answer'])) {
+            return (bool) $result['answer'];
         }
 
         return false;
     }
 
     /**
-     * Создаёт локального пользователя, используя информацию внешней системы.
+     * Проверка пользователя во внешней системе авторизации.
+     *
+     * @param   string  $email      Электронный адрес
+     * @param   string  $password   Пароль пользователя
+     * @return  boolean             Результат проверки
+     */
+    public static function check_user(string $email, string $password) {
+        $param = array('email' => $email, 'password' => $password);
+        $result = self::run_method('authorization', $param);
+
+        if (isset($result[0])) {
+            return (bool) $result[0];
+        }
+
+        return false;
+    }
+
+    /**
+     * Создание локального пользователя из данных внешней системы.
      *
      * @param   string  $email  Электронный адрес
      * @return  boolean         Результат выполнения
@@ -89,29 +105,32 @@ class auth_billing {
     }
 
     /**
-     * Получает данные пользователя из внешней системы.
+     * Получение информации о пользователе из внешней системы.
      *
      * @param   string  $email  Электронный адрес
      * @return  array           Данные пользователя
      */
-    private static function get_remote_user(string $email) {
-        $config = get_config('auth_billing');
-        $url = new moodle_url($config->host . $config->api . '/get_user');
-        $param = array('email' => $email, 'token' => $config->token);
-        return self::send_package($url, $param);
+    protected static function get_remote_user(string $email) {
+        $param = array('email' => $email);
+        return self::run_method('get_user_by_email', $param);
     }
 
     /**
-     * Отправляет данные удалённому серверу.
+     * Вызов метода с указанными параметрами.
      *
-     * @param   moodle_url  $endpoint   Адрес сервера
-     * @param   array       $param      Пакет данных
-     * @return  array                   Полученный ответ
+     * @param   string  $method Название метода
+     * @param   array   $param  Параметры
+     * @return  array           Результат
      */
-    private static function send_package(moodle_url $endpoint, array $param) {
+    protected static function run_method(string $method, array $param) {
+        $config = get_config('auth_billing');
+
+        $url = new moodle_url($config->host . $config->api . '/' . $method);
+        $param = array_merge($param, array('token' => $config->token));
+
         $curl = new curl();
         $curl->setHeader(array('Content-Type: application/json'));
-        $contents = $curl->post($endpoint, json_encode($param));
+        $contents = $curl->post($url, json_encode($param));
         $contents = json_decode($contents);
 
         if ($contents !== false) {
