@@ -32,5 +32,5 @@ docker run --detach \
 
 * Тестирование плагина:
 ```bash
-vendor/bin/phpunit --testsuite=auth_billing_testsuite
+vendor/bin/phpunit --testdox --testsuite=auth_billing_testsuite
 ```
