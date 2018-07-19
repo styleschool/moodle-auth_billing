@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Information about the version of the plugin.
+ * Заголовочный файл плагина.
  *
  * @package     auth_billing
  * @copyright   2018 "Valentin Popov" <info@valentineus.link>
@@ -26,6 +26,6 @@ defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'auth_billing';
 $plugin->maturity = MATURITY_ALPHA;
-$plugin->release = '0.0.0 (Build: 2018070800)';
+$plugin->release = '0.0.1 (Build: 2018072000)';
 $plugin->requires = 2014051200;
-$plugin->version = 2018070800;
+$plugin->version = 2018072000;

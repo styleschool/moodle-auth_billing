@@ -25,6 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/user/lib.php');
+require_once($CFG->libdir . '/filelib.php');
 
 /**
  * Класс для работы со внешней системой.
@@ -88,7 +89,7 @@ class auth_billing {
             $localuser->email = $email;
             $localuser->mnethostid = $CFG->mnet_localhost_id;
             $localuser->secret = random_string(15);
-            $localuser->username = $email;
+            $localuser->username = mb_strtolower($remoteuser['_id']);
 
             /* Поля профиля */
             $localuser->firstname = isset($remoteuser['profile']->firstname) ? $remoteuser['profile']->firstname : '';

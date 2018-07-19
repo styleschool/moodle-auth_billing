@@ -129,6 +129,5 @@ class auth_billing_api_testcase extends advanced_testcase {
         $this->assertEquals($user->email, self::$email);
         $this->assertEquals($user->firstname, self::$firstname);
         $this->assertEquals($user->lastname, self::$lastname);
-        $this->assertEquals($user->username, self::$email);
     }
 }

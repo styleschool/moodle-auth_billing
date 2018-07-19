@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Strings for component 'auth_billing', language 'en'.
+ * Строки для компонента 'auth_billing', язык 'en'.
  *
  * @package     auth_billing
  * @copyright   2018 "Valentin Popov" <info@valentineus.link>

@@ -18,6 +18,18 @@ git clone git@git.styleschool.ru:moodle/auth_billing.git auth/billing
 composer install
 ```
 
+* Запустить внешнюю службу в режиме тестирования:
+```bash
+docker run --detach \
+    --env "MONGO_URL=$(printenv MONGO_URL)" \
+    --env "NODE_ENV=development" \
+    --env "ROOT_URL=http://localhost:3000" \
+    --env "TOKEN=test" \
+    --publish "3000:3000" \
+    --restart=always
+    registry.styleschool.ru/nodejs/api-service
+```
+
 * Тестирование плагина:
 ```bash
 vendor/bin/phpunit --testsuite=auth_billing_testsuite

@@ -15,20 +15,29 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Strings for component 'auth_billing', language 'ru'.
+ * Класс плагина аутентификации.
  *
- * @package auth_billing
- * @copyright 2018 "Valentin Popov" <info@valentineus.link>
- * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package     auth_billing
+ * @copyright   2018 "Valentin Popov" <info@valentineus.link>
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir . '/authlib.php');
+require_once(__DIR__ . '/lib.php');
+
+/**
+ * Основной класс плагина.
+ *
+ * @package     auth_billing
+ * @copyright   2018 "Valentin Popov" <info@valentineus.link>
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 class auth_plugin_billing extends auth_plugin_base {
     /**
-     * Constructor.
+     * Конструктор.
      */
     public function __construct() {
         $this->authtype = 'billing';
@@ -36,8 +45,8 @@ class auth_plugin_billing extends auth_plugin_base {
     }
 
     /**
-     * Old syntax of class constructor.
-     * Deprecated in PHP7.
+     * Старый синтаксис конструктора.
+     * Устарело в PHP7.
      *
      * @deprecated  since   Moodle 3.1
      */
@@ -47,30 +56,56 @@ class auth_plugin_billing extends auth_plugin_base {
     }
 
     /**
-     * Returns true if the username and password work or don't exist and false
-     * if the user exists and the password is wrong.
-     *
-     * @param   string  $username   The username
-     * @param   string  $password   The password
-     * @return  bool                Authentication success or failure
+     * Перенаправление пользователя на изначальную страницу.
      */
-    public function user_login($username, $password) {
-        global $CFG, $DB;
+    protected static function redirect() {
+        global $CFG, $SESSION;
 
-        if ($user = $DB->get_record('user', array('username' => $username, 'mnethostid' => $CFG->mnet_localhost_id))) {
-            return validate_internal_user_password($user, $password);
+        $wantsurl = optional_param('wantsurl', '', PARAM_URL);
+        $redirect = new moodle_url($CFG->wwwroot);
+
+        if (isset($SESSION->wantsurl)) {
+            $redirect = new moodle_url($SESSION->wantsurl);
         }
 
-        return true;
+        if (!empty($wantsurl)) {
+            $redirect = new moodle_url($wantsurl);
+        }
+
+        redirect($redirect);
     }
 
     /**
-     * Updates the user's password.
-     * Called when the user password is updated.
+     * Истинно, если пользователь существует и идентификация успешна.
      *
-     * @param   object  $user           User table object
-     * @param   string  $newpassword    Plaintext password
-     * @return  boolean                 Result
+     * @param   string  $username   Электронный адрес
+     * @param   string  $password   Пароль пользователя
+     * @return  boolean             Результат проверки
+     */
+    public function user_login($username, $password) {
+        if (!auth_billing::check_user($username, $password)) {
+            return false;
+        }
+
+        if (!$user = get_complete_user_data('email', $username)) {
+            if (!auth_billing::create_user($username)) {
+                return false;
+            }
+
+            $user = get_complete_user_data('email', $username);
+        }
+
+        complete_user_login($user);
+        self::redirect();
+    }
+
+    /**
+     * Обновление пароля пользователя.
+     * Вызывается при смене пароля.
+     *
+     * @param   object  $user           Пользователь
+     * @param   string  $newpassword    Пароль
+     * @return  boolean                 Результат
      */
     public function user_update_password($user, $newpassword) {
         $user = get_complete_user_data('id', $user->id);
@@ -78,36 +113,34 @@ class auth_plugin_billing extends auth_plugin_base {
     }
 
     /**
-     * We don't want to allow users setting an internal password.
+     * Истинно, если плагин позволяет пользователю установить личный пароль.
      *
-     * @return  bool
+     * @return  boolean
      */
     public function prevent_local_passwords() {
         return false;
     }
 
     /**
-     * Returns true if this authentication plugin is 'internal'.
+     * Истинно, если плагин является внутренним.
      *
-     * @return  bool
+     * @return  boolean
      */
     public function is_internal() {
         return true;
     }
 
     /**
-     * Returns true if this authentication plugin can change the user's
-     * password.
+     * Истинно, если плагин изменяет пароль пользователя.
      *
-     * @return  bool
+     * @return  boolean
      */
     public function can_change_password() {
-        return true;
+        return false;
     }
 
     /**
-     * Returns the URL for changing the user's pw, or empty if the default can
-     * be used.
+     * Получение адреса URL для смены пароля.
      *
      * @return  moodle_url
      */
@@ -116,18 +149,18 @@ class auth_plugin_billing extends auth_plugin_base {
     }
 
     /**
-     * Returns true if plugin allows resetting of internal password.
+     * Истинно, если плагин позволяет сбросить пароль.
      *
-     * @return  bool
+     * @return  boolean
      */
     public function can_reset_password() {
-        return true;
+        return false;
     }
 
     /**
-     * Returns true if plugin can be manually set.
+     * Истинно, если плагин устанавливается вручную.
      *
-     * @return  bool
+     * @return  boolean
      */
     public function can_be_manually_set() {
         return true;
