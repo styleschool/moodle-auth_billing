@@ -78,21 +78,31 @@ class auth_plugin_billing extends auth_plugin_base {
     /**
      * Истинно, если пользователь существует и идентификация успешна.
      *
-     * @param   string  $username   Электронный адрес
+     * @param   string  $username   Логин пользователя
      * @param   string  $password   Пароль пользователя
      * @return  boolean             Результат проверки
      */
     public function user_login($username, $password) {
-        if (!auth_billing::check_user($username, $password)) {
-            return false;
-        }
-
-        if (!$user = get_complete_user_data('email', $username)) {
-            if (!auth_billing::create_user($username)) {
+        if (!validate_email($username)) {
+            if (!$user = get_complete_user_data('username', $username)) {
                 return false;
             }
 
-            $user = get_complete_user_data('email', $username);
+            if (!auth_billing::check_user($user->email, $password)) {
+                return false;
+            }
+        } else {
+            if (!auth_billing::check_user($username, $password)) {
+                return false;
+            }
+
+            if (!$user = get_complete_user_data('email', $username)) {
+                if (!auth_billing::create_user($username)) {
+                    return false;
+                }
+
+                $user = get_complete_user_data('email', $username);
+            }
         }
 
         complete_user_login($user);

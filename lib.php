@@ -57,7 +57,7 @@ class auth_billing {
      * @param   string  $password   Пароль пользователя
      * @return  boolean             Результат проверки
      */
-    public static function check_user(string $email, string $password) {
+    public static function check_user($email, $password) {
         $param = array('email' => $email, 'password' => $password);
         $result = self::run_method('authorization', $param);
 
@@ -74,11 +74,11 @@ class auth_billing {
      * @param   string  $email  Электронный адрес
      * @return  boolean         Результат выполнения
      */
-    public static function create_user(string $email) {
+    public static function create_user($email) {
         global $CFG;
 
         /* Не допускаем дублирования пользователя */
-        if (core_user::get_user_by_email($email)) {
+        if (get_complete_user_data('email', $email)) {
             return false;
         }
 
@@ -111,7 +111,7 @@ class auth_billing {
      * @param   string  $email  Электронный адрес
      * @return  array           Данные пользователя
      */
-    protected static function get_remote_user(string $email) {
+    protected static function get_remote_user($email) {
         $param = array('email' => $email);
         return self::run_method('get_user_by_email', $param);
     }
@@ -123,7 +123,7 @@ class auth_billing {
      * @param   array   $param  Параметры
      * @return  array           Результат
      */
-    protected static function run_method(string $method, array $param) {
+    protected static function run_method($method, $param) {
         $config = get_config('auth_billing');
 
         $url = new moodle_url($config->host . $config->api . '/' . $method);

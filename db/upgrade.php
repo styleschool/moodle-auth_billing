@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Заголовочный файл плагина.
+ * Выполнение патчей при обновлении плагина.
  *
  * @package     auth_billing
  * @copyright   2018 "Valentin Popov" <info@valentineus.link>
@@ -24,8 +24,12 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'auth_billing';
-$plugin->maturity = MATURITY_ALPHA;
-$plugin->release = '0.0.2 (Build: 2018072300)';
-$plugin->requires = 2014051200;
-$plugin->version = 2018072300;
+/**
+ * Обновление плагина на новую версию.
+ *
+ * @param   integer $oldversion Старая версия
+ * @return  boolean             Результат выполнения
+ */
+function xmldb_auth_billing_upgrade($oldversion) {
+    return true;
+}

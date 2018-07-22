@@ -39,7 +39,9 @@ if ($ADMIN->fulltree) {
         new lang_string('password', 'moodle'), '', '', PARAM_RAW));
 
     /* Настройка редактирование полей профиля */
-    $authplugin = get_auth_plugin('billing');
-    display_auth_lock_options($settings, $authplugin->authtype,
-        $authplugin->userfields, get_string('auth_fieldlocks_help', 'auth'), false, false);
+    if (moodle_major_version() > '3.3') {
+        $authplugin = get_auth_plugin('billing');
+        display_auth_lock_options($settings, $authplugin->authtype,
+            $authplugin->userfields, get_string('auth_fieldlocks_help', 'auth'), false, false);
+    }
 }
