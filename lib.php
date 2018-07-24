@@ -69,40 +69,32 @@ class auth_billing {
     }
 
     /**
-     * Создание локального пользователя из данных внешней системы.
+     * Создание профиля пользователя из данных внешней системы.
      *
      * @param   string  $email  Электронный адрес
-     * @return  boolean         Результат выполнения
+     * @return  array           Профиль пользователя
      */
-    public static function create_user($email) {
+    public static function create_profile($email) {
         global $CFG;
 
-        /* Не допускаем дублирования пользователя */
-        if (get_complete_user_data('email', $email)) {
-            return false;
-        }
+        $localuser = array();
 
         if ($remoteuser = self::get_remote_user($email)) {
-            /* Создание пользователя */
-            $localuser = new stdClass();
-            $localuser->auth = 'billing';
-            $localuser->email = $email;
-            $localuser->mnethostid = $CFG->mnet_localhost_id;
-            $localuser->secret = random_string(15);
-            $localuser->username = mb_strtolower($remoteuser['_id']);
+            $localuser['auth'] = 'billing';
+            $localuser['email'] = $email;
+            $localuser['mnethostid'] = $CFG->mnet_localhost_id;
+            $localuser['secret'] = random_string(15);
 
             /* Поля профиля */
-            $localuser->firstname = isset($remoteuser['profile']->firstname) ? $remoteuser['profile']->firstname : '';
-            $localuser->lastname = isset($remoteuser['profile']->lastname) ? $remoteuser['profile']->lastname : '';
+            $localuser['firstname'] = isset($remoteuser['profile']->firstname) ? $remoteuser['profile']->firstname : '';
+            $localuser['lastname'] = isset($remoteuser['profile']->lastname) ? $remoteuser['profile']->lastname : '';
 
             /* Пароль аккаунта */
-            $localuser->confirmed = 1;
-            $localuser->password = '';
-
-            return (bool) user_create_user($localuser, false, true);
+            $localuser['confirmed'] = 1;
+            $localuser['password'] = '';
         }
 
-        return false;
+        return $localuser;
     }
 
     /**

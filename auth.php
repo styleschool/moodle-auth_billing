@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Класс плагина аутентификации.
+ * Объявление класса плагина авторизации.
  *
  * @package     auth_billing
  * @copyright   2018 "Valentin Popov" <info@valentineus.link>
@@ -24,8 +24,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+require_once($CFG->dirroot . '/auth/billing/lib.php');
 require_once($CFG->libdir . '/authlib.php');
-require_once(__DIR__ . '/lib.php');
 
 /**
  * Основной класс плагина.
@@ -34,7 +34,6 @@ require_once(__DIR__ . '/lib.php');
  * @copyright   2018 "Valentin Popov" <info@valentineus.link>
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 class auth_plugin_billing extends auth_plugin_base {
     /**
      * Конструктор.
@@ -42,6 +41,7 @@ class auth_plugin_billing extends auth_plugin_base {
     public function __construct() {
         $this->authtype = 'billing';
         $this->config = get_config('auth_billing');
+        $this->errorlogtag = '[AUTH BILLING] ';
     }
 
     /**
@@ -56,74 +56,39 @@ class auth_plugin_billing extends auth_plugin_base {
     }
 
     /**
-     * Перенаправление пользователя на изначальную страницу.
-     */
-    protected static function redirect() {
-        global $CFG, $SESSION;
-
-        $wantsurl = optional_param('wantsurl', '', PARAM_URL);
-        $redirect = new moodle_url($CFG->wwwroot);
-
-        if (isset($SESSION->wantsurl)) {
-            $redirect = new moodle_url($SESSION->wantsurl);
-        }
-
-        if (!empty($wantsurl)) {
-            $redirect = new moodle_url($wantsurl);
-        }
-
-        redirect($redirect);
-    }
-
-    /**
-     * Истинно, если пользователь существует и идентификация успешна.
+     * Истинно, если пользователь идентифицирован.
      *
      * @param   string  $username   Логин пользователя
      * @param   string  $password   Пароль пользователя
      * @return  boolean             Результат проверки
      */
     public function user_login($username, $password) {
-        if (!validate_email($username)) {
-            if (!$user = get_complete_user_data('username', $username)) {
-                return false;
-            }
+        return auth_billing::check_user($username, $password);
+    }
 
-            if (!auth_billing::check_user($user->email, $password)) {
-                return false;
-            }
-        } else {
-            if (!auth_billing::check_user($username, $password)) {
-                return false;
-            }
-
-            if (!$user = get_complete_user_data('email', $username)) {
-                if (!auth_billing::create_user($username)) {
-                    return false;
-                }
-
-                $user = get_complete_user_data('email', $username);
-            }
-        }
-
-        complete_user_login($user);
-        self::redirect();
+    /**
+     * Получение информации о пользователе из внешней системы.
+     *
+     * @param   string  $username   Логин пользователя
+     * @return  array               Пользовательская информация
+     */
+    public function get_userinfo($username) {
+        return auth_billing::create_profile($username);
     }
 
     /**
      * Обновление пароля пользователя.
-     * Вызывается при смене пароля.
      *
      * @param   object  $user           Пользователь
      * @param   string  $newpassword    Пароль
      * @return  boolean                 Результат
      */
     public function user_update_password($user, $newpassword) {
-        $user = get_complete_user_data('id', $user->id);
-        return update_internal_user_password($user, $newpassword);
+        return false;
     }
 
     /**
-     * Истинно, если плагин позволяет пользователю установить личный пароль.
+     * Истинно, если плагин использует локальный пароль.
      *
      * @return  boolean
      */
@@ -132,16 +97,16 @@ class auth_plugin_billing extends auth_plugin_base {
     }
 
     /**
-     * Истинно, если плагин является внутренним.
+     * Истинно, если плагин не использует сторонние системы авторизации.
      *
      * @return  boolean
      */
     public function is_internal() {
-        return true;
+        return false;
     }
 
     /**
-     * Истинно, если плагин изменяет пароль пользователя.
+     * Истинно, если плагин позволяет сменить пароль.
      *
      * @return  boolean
      */
@@ -159,7 +124,7 @@ class auth_plugin_billing extends auth_plugin_base {
     }
 
     /**
-     * Истинно, если плагин позволяет сбросить пароль.
+     * Истинно, если плагин разрешает сбрасывать пароль.
      *
      * @return  boolean
      */
@@ -168,7 +133,7 @@ class auth_plugin_billing extends auth_plugin_base {
     }
 
     /**
-     * Истинно, если плагин устанавливается вручную.
+     * Истинно, если плагин установлен вручную.
      *
      * @return  boolean
      */
