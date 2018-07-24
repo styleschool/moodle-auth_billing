@@ -27,7 +27,11 @@ defined('MOODLE_INTERNAL') || die();
 if ($ADMIN->fulltree) {
     /* Адрес службы */
     $settings->add(new admin_setting_configtext('auth_billing/host',
-        new lang_string('url', 'moodle'), '', null, PARAM_URL));
+        new lang_string('externalservice', 'webservice'), '', null, PARAM_URL));
+
+    /* Адрес сайта */
+    $settings->add(new admin_setting_configtext('auth_billing/billing',
+        new lang_string('sitehome', 'moodle'), '', null, PARAM_URL));
 
     /* Используемая версия API */
     $apiversion = array('/v1' => 'v1');
@@ -36,7 +40,7 @@ if ($ADMIN->fulltree) {
 
     /* Используемый токен */
     $settings->add(new admin_setting_configtext('auth_billing/token',
-        new lang_string('password', 'moodle'), '', '', PARAM_RAW));
+        new lang_string('securitykey', 'webservice'), '', '', PARAM_RAW));
 
     /* Настройка редактирование полей профиля */
     if (moodle_major_version() > '3.3') {

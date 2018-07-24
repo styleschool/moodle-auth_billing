@@ -111,7 +111,7 @@ class auth_plugin_billing extends auth_plugin_base {
      * @return  boolean
      */
     public function can_change_password() {
-        return false;
+        return true;
     }
 
     /**
@@ -120,7 +120,14 @@ class auth_plugin_billing extends auth_plugin_base {
      * @return  moodle_url
      */
     public function change_password_url() {
-        return null;
+        global $USER;
+
+        $url = $this->config->billing;
+        if ($userid = auth_billing::get_id_user($USER->email)) {
+            $url .= '/user/' . $userid;
+        }
+
+        return new moodle_url($url);
     }
 
     /**

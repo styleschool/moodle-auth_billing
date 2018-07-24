@@ -98,6 +98,29 @@ class auth_billing {
     }
 
     /**
+     * Получение идентификатора внешнего пользователя.
+     *
+     * @param   string  $email  Электронный адрес
+     * @return  string          Идентификатор пользователя
+     */
+    public static function get_id_user($email) {
+        $result = '';
+
+        /* Поиск данных в кэше */
+        $cachename = md5('get_id_user' . $email);
+        if ($result = self::get_cache($cachename)) {
+            return $result;
+        }
+
+        if ($remoteuser = self::get_remote_user($email)) {
+            self::set_cache($cachename, $remoteuser['_id']);
+            $result = $remoteuser['_id'];
+        }
+
+        return $result;
+    }
+
+    /**
      * Получение информации о пользователе из внешней системы.
      *
      * @param   string  $email  Электронный адрес
@@ -131,5 +154,28 @@ class auth_billing {
         }
 
         return array();
+    }
+
+    /**
+     * Получаем данные из кэша.
+     *
+     * @param   string  $key    Ключ
+     * @return  string          Значение
+     */
+    private static function get_cache($key) {
+        $cache = cache::make('auth_billing', 'defaults');
+        return $cache->get($key);
+    }
+
+    /**
+     * Сохраняем данные в кэш.
+     *
+     * @param   string  $key    Ключ
+     * @param   string  $value  Значение
+     * @return  boolean         Результат
+     */
+    private static function set_cache($key, $value) {
+        $cache = cache::make('auth_billing', 'defaults');
+        return $cache->set($key, $value);
     }
 }

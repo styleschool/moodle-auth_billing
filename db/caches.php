@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Заголовочный файл плагина.
+ * Объявление хранилища кэша.
  *
  * @package     auth_billing
  * @copyright   2018 "Valentin Popov" <info@valentineus.link>
@@ -24,8 +24,10 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'auth_billing';
-$plugin->maturity = MATURITY_ALPHA;
-$plugin->release = '0.0.4 (Build: 2018072500)';
-$plugin->requires = 2014051200;
-$plugin->version = 2018072500;
+$definitions = array(
+    'defaults' => array(
+        'mode' => cache_store::MODE_APPLICATION,
+        'simplekeys' => true,
+        'simpledata' => true,
+    ),
+);

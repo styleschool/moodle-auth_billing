@@ -26,7 +26,7 @@ defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 
-require_once(__DIR__ . '/../lib.php');
+require_once($CFG->dirroot . '/auth/billing/lib.php');
 
 /**
  * Тестирование класса 'auth_billing'.
@@ -82,6 +82,7 @@ class auth_billing_api_testcase extends advanced_testcase {
      */
     public function test_check_service() {
         $result = auth_billing::check_service();
+        $this->assertInternalType('boolean', $result);
         $this->assertTrue($result);
     }
 
@@ -90,6 +91,7 @@ class auth_billing_api_testcase extends advanced_testcase {
      */
     public function test_check_invalid_user() {
         $result = auth_billing::check_user(self::$email, random_string(15));
+        $this->assertInternalType('boolean', $result);
         $this->assertFalse($result);
     }
 
@@ -98,36 +100,58 @@ class auth_billing_api_testcase extends advanced_testcase {
      */
     public function test_check_valid_user() {
         $result = auth_billing::check_user(self::$email, self::$password);
+        $this->assertInternalType('boolean', $result);
         $this->assertTrue($result);
     }
 
     /**
-     * @testdox Создание неверного пользователя
+     * @testdox Генерация профиля неверного пользователя
      */
-    public function test_create_invalid_user() {
-        $result = auth_billing::create_user(random_string(15));
-        $this->assertFalse($result);
+    public function test_create_profile_invalid_user() {
+        $result = auth_billing::create_profile(random_string(15));
+        $this->assertInternalType('array', $result);
+        $this->assertEmpty($result);
     }
 
     /**
-     * @testdox Создание нового пользователя
+     * @testdox Генерация профиля верного пользователя
      */
-    public function test_create_new_user() {
-        /* Создание пользователя */
-        $result = auth_billing::create_user(self::$email);
-        $this->assertTrue($result);
+    public function test_create_profile_new_user() {
+        $result = auth_billing::create_profile(self::$email);
+        $this->assertInternalType('array', $result);
+        $this->assertNotEmpty($result);
 
-        /* Попытка повторного создания пользователя */
-        $result = auth_billing::create_user(self::$email);
-        $this->assertFalse($result);
+        /* Проверка полей */
+        $this->assertEquals(1, $result['confirmed']);
+        $this->assertEquals('billing', $result['auth']);
+        $this->assertEquals(self::$email, $result['email']);
+        $this->assertEquals(self::$firstname, $result['firstname']);
+        $this->assertEquals(self::$lastname, $result['lastname']);
 
-        /* Проверка созданного пользователя */
-        $user = core_user::get_user_by_email(self::$email);
-        $this->assertEmpty($user->password);
-        $this->assertEquals($user->auth, 'billing');
-        $this->assertEquals($user->confirmed, '1');
-        $this->assertEquals($user->email, self::$email);
-        $this->assertEquals($user->firstname, self::$firstname);
-        $this->assertEquals($user->lastname, self::$lastname);
+        /* Проверка пароля */
+        $this->assertInternalType('string', $result['password']);
+        $this->assertEmpty($result['password']);
+
+        /* Проверка соли */
+        $this->assertInternalType('string', $result['secret']);
+        $this->assertNotEmpty($result['secret']);
+    }
+
+    /**
+     * @testdox Получение идентификатора некорректного пользователя
+     */
+    public function test_get_id_invalid_user() {
+        $result = auth_billing::get_id_user(random_string(15));
+        $this->assertInternalType('string', $result);
+        $this->assertEmpty($result);
+    }
+
+    /**
+     * @testdox Получение идентификатора корректного пользователя
+     */
+    public function test_get_id_valid_user() {
+        $result = auth_billing::get_id_user(self::$email);
+        $this->assertInternalType('string', $result);
+        $this->assertNotEmpty($result);
     }
 }
