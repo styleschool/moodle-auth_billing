@@ -14,9 +14,15 @@ variables:
   TRAVIS_BUILD_DIR: "$CI_PROJECT_DIR"
 
 before_script:
+  - apt update && apt install --yes apt-transport-https ca-certificates curl git-core mysql-client npm software-properties-common
+  # Установка Docker'а
+  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+  - add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+  - apt update && apt install --yes docker-ce
+  # Регистрация и запуск службы API
   - docker login --username "$(printenv GITLAB_USERNAME)" --password "$(printenv GITLAB_PASSWORD)" registry.styleschool.ru
-  - docker run --detach --env "MONGO_URL=$(printenv MONGO_URL)" --env "NODE_ENV=development" --env "ROOT_URL=http://localhost:3000" --env "TOKEN=test" --publish "3000:3000" --restart=always registry.styleschool.ru/nodejs/api-service
-  - apt update && apt install --yes git-core mysql-client npm
+  - docker run --detach --env "MONGO_URL=$(printenv MONGO_URL)" --env "NODE_ENV=development" --env "ROOT_URL=$(printenv ROOT_URL)" --env "TOKEN=test" --publish "3000:3000" --restart=always registry.styleschool.ru/nodejs/api-service
+  # Установка и настройка Moodle
   - cd $CI_PROJECT_DIR/..
   - curl -sS https://getcomposer.org/installer | php
   - mv composer.phar /usr/local/bin/composer
@@ -29,4 +35,13 @@ before_script:
 
 job1:
   script:
-    - moodle-plugin-ci phplint ; moodle-plugin-ci phpcpd ; moodle-plugin-ci phpmd ; moodle-plugin-ci codechecker ; moodle-plugin-ci csslint ; moodle-plugin-ci shifter ; moodle-plugin-ci jshint ; moodle-plugin-ci validate ; moodle-plugin-ci phpunit ; moodle-plugin-ci behat
+    - moodle-plugin-ci phplint
+    - moodle-plugin-ci phpcpd
+    - moodle-plugin-ci phpmd
+    - moodle-plugin-ci codechecker
+    - moodle-plugin-ci csslint
+    - moodle-plugin-ci shifter
+    - moodle-plugin-ci jshint
+    - moodle-plugin-ci validate
+    - moodle-plugin-ci phpunit
+    - moodle-plugin-ci behat
