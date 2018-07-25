@@ -25,7 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'auth_billing';
-$plugin->maturity = MATURITY_ALPHA;
-$plugin->release = '0.0.4 (Build: 2018072500)';
+$plugin->maturity = MATURITY_STABLE;
+$plugin->release = '0.1.0 (Build: 2018072510)';
 $plugin->requires = 2014051200;
-$plugin->version = 2018072500;
+$plugin->version = 2018072510;

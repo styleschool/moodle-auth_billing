@@ -147,4 +147,19 @@ class auth_plugin_billing extends auth_plugin_base {
     public function can_be_manually_set() {
         return true;
     }
+
+    /**
+     * Проверка настроек плагина.
+     */
+    public function test_settings() {
+        global $OUTPUT;
+
+        if (auth_billing::check_service()) {
+            $text = new lang_string('success', 'moodle');
+            echo $OUTPUT->notification($text, 'notifysuccess');
+        } else {
+            $text = new lang_string('servererror', 'moodle');
+            echo $OUTPUT->notification($text, 'notifyproblem');
+        }
+    }
 }

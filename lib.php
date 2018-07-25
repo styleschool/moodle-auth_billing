@@ -112,6 +112,7 @@ class auth_billing {
             return $result;
         }
 
+        /* Получение внешних данных */
         if ($remoteuser = self::get_remote_user($email)) {
             self::set_cache($cachename, $remoteuser['_id']);
             $result = $remoteuser['_id'];
@@ -141,9 +142,11 @@ class auth_billing {
     protected static function run_method($method, $param) {
         $config = get_config('auth_billing');
 
+        /* Генерация URL */
         $url = new moodle_url($config->host . $config->api . '/' . $method);
         $param = array_merge($param, array('token' => $config->token));
 
+        /* Отправка запроса */
         $curl = new curl();
         $curl->setHeader(array('Content-Type: application/json'));
         $contents = $curl->post($url, json_encode($param));

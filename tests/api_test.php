@@ -42,28 +42,28 @@ class auth_billing_api_testcase extends advanced_testcase {
      *
      * @var string  $email
      */
-    protected static $email = 'example@domain.org';
+    protected $email = 'example@domain.org';
 
     /**
      * Имя проверочного пользователя.
      *
      * @var string  $firstname
      */
-    protected static $firstname = 'Ada';
+    protected $firstname = 'Ada';
 
     /**
      * Фамилия проверочного пользователя.
      *
      * @var string  $lastname
      */
-    protected static $lastname = 'Lovelace';
+    protected $lastname = 'Lovelace';
 
     /**
      * Пароль проверочного пользователя.
      *
      * @var string  $password
      */
-    protected static $password = 'qwerty123456';
+    protected $password = 'qwerty123456';
 
     /**
      * Настройка плагина перед тестированием.
@@ -90,7 +90,7 @@ class auth_billing_api_testcase extends advanced_testcase {
      * @testdox Проверка неверного пользователя
      */
     public function test_check_invalid_user() {
-        $result = auth_billing::check_user(self::$email, random_string(15));
+        $result = auth_billing::check_user($this->$email, random_string(15));
         $this->assertInternalType('boolean', $result);
         $this->assertFalse($result);
     }
@@ -99,7 +99,7 @@ class auth_billing_api_testcase extends advanced_testcase {
      * @testdox Проверка корректного пользователя
      */
     public function test_check_valid_user() {
-        $result = auth_billing::check_user(self::$email, self::$password);
+        $result = auth_billing::check_user($this->$email, $this->$password);
         $this->assertInternalType('boolean', $result);
         $this->assertTrue($result);
     }
@@ -117,24 +117,19 @@ class auth_billing_api_testcase extends advanced_testcase {
      * @testdox Генерация профиля верного пользователя
      */
     public function test_create_profile_new_user() {
-        $result = auth_billing::create_profile(self::$email);
+        $result = auth_billing::create_profile($this->$email);
         $this->assertInternalType('array', $result);
         $this->assertNotEmpty($result);
 
         /* Проверка полей */
-        $this->assertEquals(1, $result['confirmed']);
         $this->assertEquals('billing', $result['auth']);
-        $this->assertEquals(self::$email, $result['email']);
-        $this->assertEquals(self::$firstname, $result['firstname']);
-        $this->assertEquals(self::$lastname, $result['lastname']);
+        $this->assertEquals($this->$email, $result['email']);
+        $this->assertEquals($this->$firstname, $result['firstname']);
+        $this->assertEquals($this->$lastname, $result['lastname']);
 
         /* Проверка пароля */
         $this->assertInternalType('string', $result['password']);
         $this->assertEmpty($result['password']);
-
-        /* Проверка соли */
-        $this->assertInternalType('string', $result['secret']);
-        $this->assertNotEmpty($result['secret']);
     }
 
     /**
@@ -150,7 +145,7 @@ class auth_billing_api_testcase extends advanced_testcase {
      * @testdox Получение идентификатора корректного пользователя
      */
     public function test_get_id_valid_user() {
-        $result = auth_billing::get_id_user(self::$email);
+        $result = auth_billing::get_id_user($this->$email);
         $this->assertInternalType('string', $result);
         $this->assertNotEmpty($result);
     }
