@@ -1,5 +1,9 @@
 # Плагин авторизации Billing
 
+Плагин авторизации Moodle.
+Пользователи идентифицируются в биллинге.
+Плагин органично встраивается и работает параллельно с имеющимися плагинами авторизации.
+
 ## Development
 
 * Установить и настроить Moodle:
@@ -23,7 +27,7 @@ composer install
 docker run --detach \
     --env "MONGO_URL=$(printenv MONGO_URL)" \
     --env "NODE_ENV=development" \
-    --env "ROOT_URL=http://localhost:3000" \
+    --env "ROOT_URL=$(printenv ROOT_URL)" \
     --env "TOKEN=test" \
     --publish "3000:3000" \
     --restart=always
