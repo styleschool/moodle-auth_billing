@@ -14,10 +14,10 @@ variables:
   TRAVIS_BUILD_DIR: "$CI_PROJECT_DIR"
 
 before_script:
-  - apt update && apt install --yes apt-transport-https ca-certificates curl git-core mysql-client npm software-properties-common
+  - apt update && apt install --yes apt-transport-https ca-certificates curl git-core gnupg2 mysql-client software-properties-common
   # Установка Docker'а
-  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
-  - add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+  - curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
+  - add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
   - apt update && apt install --yes docker-ce
   # Регистрация и запуск службы API
   - docker login --username "$(printenv GITLAB_USERNAME)" --password "$(printenv GITLAB_PASSWORD)" registry.styleschool.ru
